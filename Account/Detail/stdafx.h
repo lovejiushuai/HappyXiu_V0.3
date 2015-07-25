@@ -21,14 +21,6 @@
 #include <afxdisp.h>        // MFC Automation classes
 #endif // _AFX_NO_OLE_SUPPORT
 
-#ifndef _AFX_NO_DB_SUPPORT
-#include <afxdb.h>                      // MFC ODBC database classes
-#endif // _AFX_NO_DB_SUPPORT
-
-#ifndef _AFX_NO_DAO_SUPPORT
-#include <afxdao.h>                     // MFC DAO database classes
-#endif // _AFX_NO_DAO_SUPPORT
-
 #ifndef _AFX_NO_OLE_SUPPORT
 #include <afxdtctl.h>           // MFC support for Internet Explorer 4 Common Controls
 #endif
@@ -37,20 +29,4 @@
 #endif // _AFX_NO_AFXCMN_SUPPORT
 #include <afxcview.h>
 
-#include <string>
-#include <memory>
-#include <deque>
-#include <vector>
-#include <iterator>
-#include <iostream>
-#include <fstream>
-#include <list>
-#pragma warning(pop)
-
-using namespace std;
-
-#ifdef _UNICODE
-typedef wstring Tstring;
-#else
-typedef string Tstring;
-#endif
+#import "c:\program files\common files\system\ado\msado15.dll" no_namespace rename("EOF","adoEOF")

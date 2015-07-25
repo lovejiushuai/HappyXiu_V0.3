@@ -67,6 +67,9 @@
     <None Include="res\bar1.ico">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="res\login.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Detail.cpp">
@@ -87,7 +90,10 @@
     <ClCompile Include="RightView.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CoolTabCtrl.cpp">
+    <ClCompile Include="InfoDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LeftCtrl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -119,7 +125,10 @@
     <ClInclude Include="RightView.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CoolTabCtrl.h">
+    <ClInclude Include="InfoDialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LeftCtrl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

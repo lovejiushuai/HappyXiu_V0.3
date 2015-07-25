@@ -6,6 +6,7 @@
 #include "Account.h"
 #include "AccountDlg.h"
 #include "Global.h"
+#include "LoginDialog.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -29,6 +30,7 @@ CAccountApp::CAccountApp()
 	// TODO: add construction code here,
 	// Place all significant initialization in InitInstance
 	m_hApptDllInstance = NULL;
+	adminLevel = 0;
 }
 
 
@@ -110,6 +112,16 @@ BOOL CAccountApp::InitInstance()
 
 
 	getAppCurDir(m_exeFullPath);
+
+	CLoginDialog loginDlg;
+	if(IDOK==loginDlg.DoModal()) // µÇÂ¼¶Ô»°¿ò
+	{
+		theApp.adminLevel = 1;
+	}
+	else
+	{
+		theApp.adminLevel = 0;
+	}
 
 	CAccountDlg dlg;
 	m_pMainWnd = &dlg;

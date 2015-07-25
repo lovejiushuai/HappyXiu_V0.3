@@ -21,6 +21,23 @@ public:
 
 protected:
 	DECLARE_MESSAGE_MAP()
+public:
+	virtual void OnInitialUpdate();
+
+
+	CString dataID;	
+	CString cabinetName;
+	CString moduleNum;
+	CString slotNum;
+	
+
+	CString m_listName;
+	CString m_inquerySQL;
+
+protected:
+	void LoadControl();
+	void OnConnectSQL();
+
 };
 
 

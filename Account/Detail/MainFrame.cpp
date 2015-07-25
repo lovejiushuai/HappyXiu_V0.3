@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "Detail.h"
 #include "MainFrame.h"
-
+#include "InfoDialog.h"
 
 // CMainFrame
 
@@ -18,6 +18,7 @@ CMainFrame::CMainFrame()
 
 CMainFrame::~CMainFrame()
 {
+	::CoUninitialize();	//退出com库
 }
 
 void CMainFrame::OnFinalRelease()
@@ -33,7 +34,8 @@ void CMainFrame::OnFinalRelease()
 
 BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_WM_CREATE()
-	ON_COMMAND(ID_BN_RESTORE,OnRestore)
+	ON_NOTIFY(NM_DBLCLK, 100, OnDblclkTree)
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 BEGIN_DISPATCH_MAP(CMainFrame, CFrameWnd)
@@ -62,13 +64,63 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	// TODO:  Add your specialized creation code here
 
+	LoadControl();
+
+	return 1L;
+}
+
+void CMainFrame::LoadControl()
+{
+		
+	
+#if _WIN32_WINNT > 0x500
+	//保留字（必须为null） ，加载方式 COINIT_MULTITHREADED多线程的方式加载
+	// 以多线程方式打开com通道
+	::CoInitializeEx(NULL, COINIT_MULTITHREADED);
+#else
+	::CoInitialize(NULL);
+#endif
+
+	/*CoInitialize(NULL);*/
+	HRESULT hr;
+	try                            //连接数据库
+	{
+		hr = theApp.m_pConnection.CreateInstance(__uuidof(Connection)/*"ADODB.Connection"*/);
+		if(SUCCEEDED(hr))
+		{
+			theApp.m_pConnection->ConnectionTimeout = 10;	//连接超时
+			theApp.m_pConnection->CursorLocation = adUseClient;//作用于记录集指针，非常重要!!!
+			theApp.m_pConnection->ConnectionString = _T("File Name=调度.udl");
+			theApp.m_pConnection->Open("","","",-1);
+		}
+	}
+	catch(_com_error e)
+	{
+		CString str;
+		str.Format(_T("连接数据库失败:%s"),e.ErrorMessage());
+		::MessageBox(NULL,str,_T("提示信息"),NULL);
+		//return false;
+	}
+	
+	// 获取当前屏幕分辨率  -- 但不包括状态栏大小
+	int screenwidth=GetSystemMetrics(SM_CXFULLSCREEN);
+	int screenheight=GetSystemMetrics(SM_CYFULLSCREEN);
+	/*int screenwidth=800;
+	int screenheight=600;*/
+
+	CRect m_rcPanel;
+	//设置当前窗口大小  与 当前屏幕分辨率 一致
+	m_rcPanel.SetRect(0,0,screenwidth,screenheight);
+	MoveWindow(&m_rcPanel);
+
+
 	/////////////这一段代码创建树型控件////////////
 	if (!m_wndTree.Create(WS_CHILD|WS_VISIBLE|
 		TVS_HASLINES|TVS_HASBUTTONS|TVS_LINESATROOT,
 		CRect(0, 0, 0, 0), m_pLeft, 100))  ///注意，这里是将m_pLeft作为m_wndTree的父窗口
 	{
 		TRACE0("Failed to create instant bar child\n");
-		return -1;
+		return;
 	}
 	m_wndTree.ModifyStyleEx(0, WS_EX_CLIENTEDGE);
 	//添加树型控件图标
@@ -88,42 +140,42 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	{
 		m_wndTree.InsertItem(_T("模 块  I"),2,4,hti2);
 	}*/
-	m_wndTree.InsertItem(_T("模 块  I"),2,4,hti2);
-	m_wndTree.InsertItem(_T("模 块  II"),2,4,hti2);	
-	m_wndTree.InsertItem(_T("模 块  III"),2,4,hti2);
+	m_wndTree.InsertItem(_T("模块Ⅰ"),2,4,hti2);
+	m_wndTree.InsertItem(_T("模块Ⅱ"),2,4,hti2);	
+	m_wndTree.InsertItem(_T("模块Ⅲ"),2,4,hti2);
 
 	HTREEITEM hti3=m_wndTree.InsertItem(_T("兰州西"),0,3,hti);
 	/*if(theApp.m_status!=_T("普通用户"))
 	{
 		m_wndTree.InsertItem(_T(""),2,4,hti3);
 	}*/
-	m_wndTree.InsertItem(_T("模 块  I"),2,4,hti3);
+	m_wndTree.InsertItem(_T("模块Ⅰ"),2,4,hti3);
 
 	HTREEITEM hti4=m_wndTree.InsertItem(_T("兰西动车所"),0,3,hti);
 	/*if(theApp.m_status!=_T("普通用户"))
 	{
 		m_wndTree.InsertItem(_T(""),2,4,hti4);
 	}*/
-	m_wndTree.InsertItem(_T("模 块  I"),2,4,hti4);
+	m_wndTree.InsertItem(_T("模块Ⅰ"),2,4,hti4);
 	
 	HTREEITEM hti5=m_wndTree.InsertItem(_T("陈家湾"),0,3,hti);
 	/*if(theApp.m_status!=_T("普通用户"))
 	{
 		m_wndTree.InsertItem(_T(""),2,4,hti5);
 	}*/
-	m_wndTree.InsertItem(_T("模 块  I"),2,4,hti5);
+	m_wndTree.InsertItem(_T("模块Ⅰ"),2,4,hti5);
 	
 	HTREEITEM hti6=m_wndTree.InsertItem(_T("民和南"),0,3,hti);
 	/*if(theApp.m_status!=_T("普通用户"))
 	{
 	m_wndTree.InsertItem(_T(""),2,4,hti6);
 	}*/
-	m_wndTree.InsertItem(_T("模 块  I"),2,4,hti6);	
+	m_wndTree.InsertItem(_T("模块Ⅰ"),2,4,hti6);	
 
 	HTREEITEM hti7=m_wndTree.InsertItem(_T("兰新高铁备用主系统"),0,3,hti);	
-	m_wndTree.InsertItem(_T("模 块  I"),2,4,hti7);
-	m_wndTree.InsertItem(_T("模 块  II"),2,4,hti7);	
-	m_wndTree.InsertItem(_T("模 块  III"),2,4,hti7);
+	m_wndTree.InsertItem(_T("模块Ⅰ"),2,4,hti7);
+	m_wndTree.InsertItem(_T("模块Ⅱ"),2,4,hti7);	
+	m_wndTree.InsertItem(_T("模块Ⅲ"),2,4,hti7);
 
 	HTREEITEM hti8=m_wndTree.InsertItem(_T("其它信息"),0,3, hti);
 	if(theApp.m_status!=_T("普通用户"))
@@ -143,14 +195,11 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_wndTree.Expand(hti7,TVE_EXPAND);
 	m_wndTree.Expand(hti8,TVE_EXPAND);*/
 
-	///将树型控件加入到TabCtrl中
+	///将树型控件加入到LeftCtrl中
 	m_pLeft->AddPage(&m_wndTree,_T("Dialog"),IDI_ICON10); //将树型控件添加到第一页
 	
-	m_pLeft->UpdateWindow(); //更新TabControl
-
-	return 0;
+	m_pLeft->UpdateWindow(); //更新LeftControl
 }
-
 
 BOOL CMainFrame::LoadFrame(UINT nIDResource, DWORD dwDefaultStyle , CWnd* pParentWnd , CCreateContext* pContext)
 {
@@ -164,25 +213,153 @@ BOOL CMainFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext)
 {
 	// TODO: Add your specialized code here and/or call the base class
 
-	//Create splitter window by two views
+	//Create splitter window by two views  用 splitter 把 视图 划分为两块
 	if (!m_wndSplitter.CreateStatic(this, 1, 2))
 		return -1;
 
-	if (!m_wndSplitter.CreateView(0, 1, RUNTIME_CLASS(CRightView), CSize(100, 100),pContext) ||
-		!m_wndSplitter.CreateView(0, 0, RUNTIME_CLASS(CCoolTabCtrl), CSize(100, 100),pContext))
+	/*if (!m_wndSplitter.CreateView(0, 1, RUNTIME_CLASS(CRightView), CSize(100, 100),pContext) ||
+	!m_wndSplitter.CreateView(0, 0, RUNTIME_CLASS(CLeftCtrl), CSize(100, 100),pContext))
+	{
+	m_wndSplitter.DestroyWindow();
+	return FALSE;
+	}*/
+
+	// 若两个都传进 pContext   List会重复画两遍   所以定义 CCreateContext cc  解决重复问题
+	if (!m_wndSplitter.CreateView(0, 1, RUNTIME_CLASS(CRightView), CSize(100, 100),&theApp.cc) ||
+		!m_wndSplitter.CreateView(0, 0, RUNTIME_CLASS(CLeftCtrl), CSize(100, 100),pContext))
 	{
 		m_wndSplitter.DestroyWindow();
 		return FALSE;
 	}
 	m_pRight = reinterpret_cast<CRightView*>(m_wndSplitter.GetPane(0,1));
-	m_pLeft = reinterpret_cast<CCoolTabCtrl*>(m_wndSplitter.GetPane(0,0));
+	m_pLeft = reinterpret_cast<CLeftCtrl*>(m_wndSplitter.GetPane(0,0));
 	m_wndSplitter.SetColumnInfo(0, 200, 100);	
 
 	return CFrameWnd::OnCreateClient(lpcs, pContext);
 }
 
-void CMainFrame::OnRestore()
+int pos=-100;	//用以控制对话框位置移动的变量
+void CMainFrame::OnDblclkTree(NMHDR* pNMHDR, LRESULT* pResult)		//树型控件的双击事件
 {
-	//the filter
+
+	pos+=20;
+	if(pos>0) pos=-70;
+	HTREEITEM hm=m_wndTree.GetSelectedItem();
+	HTREEITEM hItemParent;
+	CString str;
+	CRect rect;
+	CString listName;
+	CString mNum;
+	CString mItemParent;
+	int selectModNum;
+
+	listName.Empty();
+	mNum.Empty();
+	selectModNum = 0;
+
+	GetClientRect(&rect);
+	hItemParent = m_wndTree.GetParentItem(hm);
+	mItemParent = m_wndTree.GetItemText(hItemParent);
+	str=m_wndTree.GetItemText(hm);
+	if (mItemParent == _T("兰新高铁主用主系统"))
+	{
+		listName.Format(_T("main"));
+	}
+	else if (mItemParent == _T("兰州西"))
+	{
+		listName.Format(_T("lanzhouxi"));
+	}
+	else if (mItemParent == _T("兰西动车所"))
+	{
+		listName.Format(_T("lanxidong"));
+	}
+	else if (mItemParent == _T("陈家湾"))
+	{
+		listName.Format(_T("chenjiawan"));
+	}
+	else if (mItemParent == _T("民和南"))
+	{
+		listName.Format(_T("minhenan"));
+	}
+	else if (mItemParent == _T("兰新高铁备用主系统"))
+	{
+		listName.Format(_T("spare"));
+	}
+	
+	if(str==_T("模块Ⅰ"))
+	{
+		
+
+		m_wndTree.GetFirstVisibleItem();		
+		mNum.Format(str);
+		selectModNum = 1;
+		CInfoDialog *infoDialog = new CInfoDialog;
+		infoDialog->onSetDatabase( listName, mNum, selectModNum, 1);
+		infoDialog->Create(IDD_INFODIALOG,this);
+		infoDialog->ShowWindow(SW_SHOW);	//显示非模态对话框
+
+		//移动对话框的位置使其不重叠
+		//InStuInfoDlg->SetWindowPos(0,rect.right/2+pos,rect.bottom/2+pos,0,0,SWP_NOSIZE | SWP_NOZORDER);
+
+	}
+	else if(str==_T("模块Ⅱ"))
+	{
+		mNum.Format(str);
+		selectModNum = 2;
+		CInfoDialog *infoDialog = new CInfoDialog;
+		infoDialog->onSetDatabase( listName, mNum, selectModNum, 1);
+		infoDialog->Create(IDD_INFODIALOG,this);
+		infoDialog->ShowWindow(SW_SHOW);	//显示非模态对话框
+
+		//移动对话框的位置使其不重叠
+		//InStuInfoDlg->SetWindowPos(0,rect.right/2+pos,rect.bottom/2+pos,0,0,SWP_NOSIZE | SWP_NOZORDER);
+	}
+	else if(str==_T("模块Ⅲ"))
+	{
+		mNum.Format(str);
+		selectModNum = 3;
+		CInfoDialog *infoDialog = new CInfoDialog;
+		infoDialog->onSetDatabase( listName, mNum, selectModNum, 1);
+		infoDialog->Create(IDD_INFODIALOG,this);
+		infoDialog->ShowWindow(SW_SHOW);	//显示非模态对话框
+
+		//移动对话框的位置使其不重叠
+		//InStuInfoDlg->SetWindowPos(0,rect.right/2+pos,rect.bottom/2+pos,0,0,SWP_NOSIZE | SWP_NOZORDER);
+		
+	}
+	else if(str==_T("数据备份"))
+	{
+
+	}
+	else if(str==_T("数据还原"))
+	{
+		
+	}
 
 }
+
+
+void CMainFrame::OnDestroy()
+{
+	CFrameWnd::OnDestroy();
+
+	// TODO: Add your message handler code here
+
+	//关闭记录集和连接
+
+	/*if(theApp.m_pRecordset!=NULL)
+	{
+		theApp.m_pRecordset->Close();
+		theApp.m_pRecordset.Release();
+	}
+
+	if (theApp.m_pConnection !=NULL )
+	{
+		theApp.m_pConnection->Close();
+		theApp.m_pConnection.Release();
+	}*/
+	
+
+	//CoUninitialize();	//退出com库
+}
+
